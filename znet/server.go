@@ -14,6 +14,15 @@ type Server struct {
 	Port      string
 }
 
+func callBackToClient(conn *net.TCPConn, data []byte, count int) error {
+	if _, err := conn.Write(data[:count]); err != nil {
+		fmt.Println("Failed to write data:", err)
+		return err
+	}
+
+	return nil
+}
+
 func (s *Server) Start() {
 	fmt.Printf("[START] Server %s is starting. Listening %s:%s.\n", s.Name, s.IP, s.Port)
 
@@ -37,21 +46,8 @@ func (s *Server) Start() {
 				continue
 			}
 
-			go func() {
-				for {
-					buf := make([]byte, 512)
-					count, err := conn.Read(buf)
-					if err != nil {
-						fmt.Println("Failed to read data:", err)
-						break
-					}
-
-					if _, err = conn.Write(buf[:count]); err != nil {
-						fmt.Println("Failed to write data:", err)
-						continue
-					}
-				}
-			}()
+			connPtr := NewConnection(conn, callBackToClient)
+			go connPtr.Start()
 		}
 	}()
 }
