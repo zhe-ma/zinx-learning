@@ -10,7 +10,7 @@ type Connection struct {
 	conn         *net.TCPConn
 	exitBuffChan chan bool
 	isClosed     bool
-	handler      ziface.HandleFunc
+	router       ziface.IRouter
 }
 
 func (c *Connection) startReader() {
@@ -28,11 +28,10 @@ func (c *Connection) startReader() {
 			continue
 		}
 
-		if err := c.handler(c.conn, buf, count); err != nil {
-			fmt.Println("Failed to call handler:", err)
-			c.exitBuffChan <- true
-			return
-		}
+		request := NewRequest(c, buf[:count])
+		c.router.PreHandle(request)
+		c.router.Handle(request)
+		c.router.PostHandle(request)
 	}
 }
 
@@ -61,15 +60,19 @@ func (c *Connection) Stop() {
 	close(c.exitBuffChan)
 }
 
+func (c *Connection) GetTcpConnection() *net.TCPConn {
+	return c.conn
+}
+
 func (c *Connection) RemoteAddr() net.Addr {
 	return c.conn.RemoteAddr()
 }
 
-func NewConnection(conn *net.TCPConn, handler ziface.HandleFunc) *Connection {
+func NewConnection(conn *net.TCPConn, router ziface.IRouter) *Connection {
 	return &Connection{
 		conn:         conn,
 		exitBuffChan: make(chan bool, 1),
 		isClosed:     false,
-		handler:      handler,
+		router:       router,
 	}
 }

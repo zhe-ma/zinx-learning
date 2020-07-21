@@ -2,10 +2,9 @@ package ziface
 
 import "net"
 
-type HandleFunc func(conn *net.TCPConn, data []byte, count int) error
-
 type IConnection interface {
 	Start()
 	Stop()
+	GetTcpConnection() *net.TCPConn
 	RemoteAddr() net.Addr
 }

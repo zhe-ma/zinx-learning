@@ -5,7 +5,7 @@ import (
 	"net"
 )
 
-func main() {
+func main2() {
 	client, err := net.Dial("tcp4", "0.0.0.0:9547")
 	if err != nil {
 		panic(err)
