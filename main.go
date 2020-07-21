@@ -7,6 +7,7 @@ import (
 )
 
 type PingRouter struct {
+	znet.BaseRouter
 }
 
 func (pr *PingRouter) PreHandle(req ziface.IRequtest) {
@@ -31,7 +32,7 @@ func (pr *PingRouter) PostHandle(req ziface.IRequtest) {
 }
 
 func main() {
-	server := znet.NewServer("Test")
+	server := znet.NewServer()
 	server.AddRouter(&PingRouter{})
 	server.Serve()
 }

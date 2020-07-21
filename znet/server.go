@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"time"
+	"zinx-learning/utils"
 	"zinx-learning/ziface"
 )
 
@@ -71,12 +72,15 @@ func (s *Server) AddRouter(router ziface.IRouter) {
 	s.Router = router
 }
 
-func NewServer(name string) ziface.IServer {
+func NewServer() ziface.IServer {
+	fmt.Println(utils.GlobalObj.TCPPort, utils.GlobalObj.Host, utils.GlobalObj.ServerName)
+
 	return &Server{
-		Name:      name,
+		Name:      utils.GlobalObj.ServerName,
 		IPVersion: "tcp4",
-		IP:        "0.0.0.0",
-		Port:      "9547",
+		IP:        utils.GlobalObj.Host,
+		Port:      utils.GlobalObj.TCPPort,
 		Router:    nil,
 	}
+
 }
