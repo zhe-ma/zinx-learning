@@ -1,5 +1,6 @@
 {
   "Host" : "127.0.0.1",
   "TCPPort" : "9547",
-  "ServerName": "ServerTest"
+  "ServerName": "ServerTest",
+  "MaxPacketSize" : 4096
 }

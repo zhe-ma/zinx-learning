@@ -5,21 +5,25 @@ import (
 )
 
 type Request struct {
-	conn ziface.IConnection
-	data []byte
+	Conn ziface.IConnection
+	Msg  ziface.IMessage
 }
 
 func (r *Request) GetConnection() ziface.IConnection {
-	return r.conn
+	return r.Conn
 }
 
 func (r *Request) GetData() []byte {
-	return r.data
+	return r.Msg.GetData()
 }
 
-func NewRequest(conn ziface.IConnection, data []byte) ziface.IRequtest {
+func (r *Request) GetMsgID() uint32 {
+	return r.Msg.GetMsgID()
+}
+
+func NewRequest(conn ziface.IConnection, msg ziface.IMessage) *Request {
 	return &Request{
-		conn: conn,
-		data: data,
+		Conn: conn,
+		Msg:  msg,
 	}
 }

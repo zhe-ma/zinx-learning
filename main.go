@@ -10,25 +10,22 @@ type PingRouter struct {
 	znet.BaseRouter
 }
 
-func (pr *PingRouter) PreHandle(req ziface.IRequtest) {
+func (pr *PingRouter) PreHandle(req ziface.IRequest) {
 	fmt.Println("[PingRouter] PreHandle.")
-	if _, err := req.GetConnection().GetTcpConnection().Write([]byte("Before ping...")); err != nil {
-		fmt.Println("Failed to write data.")
-	}
 }
 
-func (pr *PingRouter) Handle(req ziface.IRequtest) {
+func (pr *PingRouter) Handle(req ziface.IRequest) {
 	fmt.Println("[PingRouter] Handle.")
-	if _, err := req.GetConnection().GetTcpConnection().Write([]byte("Ping...")); err != nil {
-		fmt.Println("Failed to write data.")
+
+	fmt.Println("Request: MsgID=", req.GetMsgID(), "MsgData:", string(req.GetData()))
+
+	if err := req.GetConnection().SendMsg(1, []byte("Pong pong...")); err != nil {
+		fmt.Println("Failed to write data:", err)
 	}
 }
 
-func (pr *PingRouter) PostHandle(req ziface.IRequtest) {
+func (pr *PingRouter) PostHandle(req ziface.IRequest) {
 	fmt.Println("[PingRouter] PostHandle.")
-	if _, err := req.GetConnection().GetTcpConnection().Write([]byte("Post ping...")); err != nil {
-		fmt.Println("Failed to write data.")
-	}
 }
 
 func main() {

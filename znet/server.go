@@ -16,15 +16,6 @@ type Server struct {
 	Router    ziface.IRouter
 }
 
-func callBackToClient(conn *net.TCPConn, data []byte, count int) error {
-	if _, err := conn.Write(data[:count]); err != nil {
-		fmt.Println("Failed to write data:", err)
-		return err
-	}
-
-	return nil
-}
-
 func (s *Server) Start() {
 	fmt.Printf("[START] Server %s is starting. Listening %s:%s.\n", s.Name, s.IP, s.Port)
 
