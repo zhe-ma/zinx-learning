@@ -13,11 +13,12 @@ type Connection struct {
 	ExitBuffChan chan bool
 	IsClosed     bool
 	MsgHandler   ziface.IMsgHandler
+	MsgChan      chan []byte
 }
 
 func (c *Connection) startReader() {
 	fmt.Println("Reader Goroutine is running.")
-	defer fmt.Println(c.RemoteAddr().String(), " connetion exit.")
+	defer fmt.Println(c.RemoteAddr().String(), "reader connection exit.")
 
 	defer c.Stop()
 
@@ -28,15 +29,13 @@ func (c *Connection) startReader() {
 		headData := make([]byte, dataPack.GetHeadLen())
 		if _, err := io.ReadFull(c.Conn, headData); err != nil {
 			fmt.Println("Failed to read data:", err)
-			c.ExitBuffChan <- true
-			continue
+			break
 		}
 
 		msg, err := dataPack.Unpack(headData)
 		if err != nil {
 			fmt.Println("Failed to unpack data:", err)
-			c.ExitBuffChan <- true
-			continue
+			break
 		}
 
 		var data []byte
@@ -44,8 +43,7 @@ func (c *Connection) startReader() {
 			data = make([]byte, msg.GetDataLen())
 			if _, err := io.ReadFull(c.Conn, data); err != nil {
 				fmt.Println("Failed to read data:", err)
-				c.ExitBuffChan <- true
-				continue
+				break
 			}
 		}
 
@@ -56,15 +54,28 @@ func (c *Connection) startReader() {
 	}
 }
 
-func (c *Connection) Start() {
-	go c.startReader()
+func (c *Connection) startWriter() {
+	fmt.Println("Writer Goroutine is running.")
+	defer fmt.Println(c.RemoteAddr().String(), "writer connection exit.")
 
 	for {
 		select {
+		case msg := <-c.MsgChan:
+			if _, err := c.Conn.Write(msg); err != nil {
+				fmt.Println("Failed to write data.")
+				c.ExitBuffChan <- true
+				return
+			}
+
 		case <-c.ExitBuffChan:
 			return
 		}
 	}
+}
+
+func (c *Connection) Start() {
+	go c.startReader()
+	go c.startWriter()
 }
 
 func (c *Connection) Stop() {
@@ -79,6 +90,7 @@ func (c *Connection) Stop() {
 	c.ExitBuffChan <- true
 
 	close(c.ExitBuffChan)
+	close(c.MsgChan)
 }
 
 func (c *Connection) GetTcpConnection() *net.TCPConn {
@@ -101,12 +113,7 @@ func (c *Connection) SendMsg(msgID uint32, data []byte) error {
 		return errors.New("Failed to pack data")
 	}
 
-	_, err = c.Conn.Write(packedData)
-	if err != nil {
-		fmt.Println("Failed to write data:", err, "MsgId:", msgID)
-		c.ExitBuffChan <- true
-		return errors.New("Failed to wriete data")
-	}
+	c.MsgChan <- packedData
 
 	return nil
 }
@@ -117,5 +124,6 @@ func NewConnection(conn *net.TCPConn, msgHandler ziface.IMsgHandler) *Connection
 		ExitBuffChan: make(chan bool, 1),
 		IsClosed:     false,
 		MsgHandler:   msgHandler,
+		MsgChan:      make(chan []byte),
 	}
 }
