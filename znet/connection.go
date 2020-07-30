@@ -12,7 +12,7 @@ type Connection struct {
 	Conn         *net.TCPConn
 	ExitBuffChan chan bool
 	IsClosed     bool
-	Router       ziface.IRouter
+	MsgHandler   ziface.IMsgHandler
 }
 
 func (c *Connection) startReader() {
@@ -52,9 +52,7 @@ func (c *Connection) startReader() {
 		msg.SetData(data)
 
 		request := NewRequest(c, msg)
-		c.Router.PreHandle(request)
-		c.Router.Handle(request)
-		c.Router.PostHandle(request)
+		go c.MsgHandler.HandleMsg(request)
 	}
 }
 
@@ -113,11 +111,11 @@ func (c *Connection) SendMsg(msgID uint32, data []byte) error {
 	return nil
 }
 
-func NewConnection(conn *net.TCPConn, router ziface.IRouter) *Connection {
+func NewConnection(conn *net.TCPConn, msgHandler ziface.IMsgHandler) *Connection {
 	return &Connection{
 		Conn:         conn,
 		ExitBuffChan: make(chan bool, 1),
 		IsClosed:     false,
-		Router:       router,
+		MsgHandler:   msgHandler,
 	}
 }

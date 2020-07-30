@@ -30,6 +30,6 @@ func (pr *PingRouter) PostHandle(req ziface.IRequest) {
 
 func main() {
 	server := znet.NewServer()
-	server.AddRouter(&PingRouter{})
+	server.AddRouter(1, &PingRouter{})
 	server.Serve()
 }

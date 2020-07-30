@@ -1,8 +1,6 @@
 package ziface
 
-type IServer interface {
-	Start()
-	Stop()
-	Serve()
+type IMsgHandler interface {
+	HandleMsg(request IRequest)
 	AddRouter(msgID uint32, router IRouter) error
 }

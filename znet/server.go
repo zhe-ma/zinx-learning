@@ -9,11 +9,11 @@ import (
 )
 
 type Server struct {
-	Name      string
-	IPVersion string
-	IP        string
-	Port      string
-	Router    ziface.IRouter
+	Name       string
+	IPVersion  string
+	IP         string
+	Port       string
+	MsgHandler ziface.IMsgHandler
 }
 
 func (s *Server) Start() {
@@ -39,7 +39,7 @@ func (s *Server) Start() {
 				continue
 			}
 
-			connPtr := NewConnection(conn, s.Router)
+			connPtr := NewConnection(conn, s.MsgHandler)
 			go connPtr.Start()
 		}
 	}()
@@ -59,19 +59,18 @@ func (s *Server) Serve() {
 	}
 }
 
-func (s *Server) AddRouter(router ziface.IRouter) {
-	s.Router = router
+func (s *Server) AddRouter(msgID uint32, router ziface.IRouter) error {
+	return s.MsgHandler.AddRouter(msgID, router)
 }
 
 func NewServer() ziface.IServer {
 	fmt.Println(utils.GlobalObj.TCPPort, utils.GlobalObj.Host, utils.GlobalObj.ServerName)
 
 	return &Server{
-		Name:      utils.GlobalObj.ServerName,
-		IPVersion: "tcp4",
-		IP:        utils.GlobalObj.Host,
-		Port:      utils.GlobalObj.TCPPort,
-		Router:    nil,
+		Name:       utils.GlobalObj.ServerName,
+		IPVersion:  "tcp4",
+		IP:         utils.GlobalObj.Host,
+		Port:       utils.GlobalObj.TCPPort,
+		MsgHandler: NewMsgHandler(),
 	}
-
 }

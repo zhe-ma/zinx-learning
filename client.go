@@ -16,7 +16,7 @@ func main() {
 
 	for {
 		dataPack := znet.DataPack{}
-		data, err := dataPack.Pack(znet.NewMessage(101, []byte("Ping ping...")))
+		data, err := dataPack.Pack(znet.NewMessage(1, []byte("Ping ping...")))
 		if err != nil {
 			fmt.Println("Failed to pack data:", err)
 			break
