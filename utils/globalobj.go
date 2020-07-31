@@ -6,10 +6,12 @@ import (
 )
 
 type GlobalObject struct {
-	Host          string
-	TCPPort       string
-	ServerName    string
-	MaxPacketSize uint32
+	Host             string
+	TCPPort          string
+	ServerName       string
+	MaxPacketSize    uint32
+	WorkPoolSize     uint32
+	MaxWorkerTaskLen uint32
 }
 
 var GlobalObj *GlobalObject
@@ -27,10 +29,12 @@ func (g *GlobalObject) Reload() {
 
 func init() {
 	GlobalObj = &GlobalObject{
-		Host:          "127.0.0.1",
-		TCPPort:       "9627",
-		ServerName:    "Test",
-		MaxPacketSize: 4096,
+		Host:             "127.0.0.1",
+		TCPPort:          "9627",
+		ServerName:       "Test",
+		MaxPacketSize:    4096,
+		WorkPoolSize:     10,
+		MaxWorkerTaskLen: 1024,
 	}
 
 	GlobalObj.Reload()

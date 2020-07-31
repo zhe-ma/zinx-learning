@@ -2,5 +2,7 @@
   "Host" : "127.0.0.1",
   "TCPPort" : "9547",
   "ServerName": "ServerTest",
-  "MaxPacketSize" : 4096
+  "MaxPacketSize" : 4096,
+  "WorkerPoolSize": 10,
+  "MaxWorkerTaskLen": 1024
 }

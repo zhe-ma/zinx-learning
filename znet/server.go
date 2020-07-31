@@ -32,6 +32,8 @@ func (s *Server) Start() {
 			return
 		}
 
+		var connID uint32 = 0
+
 		for {
 			conn, err := listener.AcceptTCP()
 			if err != nil {
@@ -39,7 +41,9 @@ func (s *Server) Start() {
 				continue
 			}
 
-			connPtr := NewConnection(conn, s.MsgHandler)
+			connID++
+
+			connPtr := NewConnection(conn, connID, s.MsgHandler)
 			go connPtr.Start()
 		}
 	}()

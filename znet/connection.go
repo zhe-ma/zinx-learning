@@ -12,6 +12,7 @@ type Connection struct {
 	Conn         *net.TCPConn
 	ExitBuffChan chan bool
 	IsClosed     bool
+	ConnID       uint32
 	MsgHandler   ziface.IMsgHandler
 	MsgChan      chan []byte
 }
@@ -50,7 +51,7 @@ func (c *Connection) startReader() {
 		msg.SetData(data)
 
 		request := NewRequest(c, msg)
-		go c.MsgHandler.HandleMsg(request)
+		c.MsgHandler.SendToTaskQueue(request)
 	}
 }
 
@@ -97,6 +98,10 @@ func (c *Connection) GetTcpConnection() *net.TCPConn {
 	return c.Conn
 }
 
+func (c *Connection) GetConnID() uint32 {
+	return c.ConnID
+}
+
 func (c *Connection) RemoteAddr() net.Addr {
 	return c.Conn.RemoteAddr()
 }
@@ -118,11 +123,12 @@ func (c *Connection) SendMsg(msgID uint32, data []byte) error {
 	return nil
 }
 
-func NewConnection(conn *net.TCPConn, msgHandler ziface.IMsgHandler) *Connection {
+func NewConnection(conn *net.TCPConn, connID uint32, msgHandler ziface.IMsgHandler) *Connection {
 	return &Connection{
 		Conn:         conn,
 		ExitBuffChan: make(chan bool, 1),
 		IsClosed:     false,
+		ConnID:       connID,
 		MsgHandler:   msgHandler,
 		MsgChan:      make(chan []byte),
 	}
