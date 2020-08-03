@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"zinx-learning/utils"
 	"zinx-learning/ziface"
 )
 
@@ -51,7 +52,12 @@ func (c *Connection) startReader() {
 		msg.SetData(data)
 
 		request := NewRequest(c, msg)
-		c.MsgHandler.SendToTaskQueue(request)
+
+		if utils.GlobalObj.WorkPoolSize > 1 {
+			c.MsgHandler.SendToTaskQueue(request)
+		} else {
+			go c.MsgHandler.HandleMsg(request)
+		}
 	}
 }
 

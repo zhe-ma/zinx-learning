@@ -32,6 +32,8 @@ func (s *Server) Start() {
 			return
 		}
 
+		s.MsgHandler.StartWorkPool()
+
 		var connID uint32 = 0
 
 		for {
@@ -51,7 +53,6 @@ func (s *Server) Start() {
 
 func (s *Server) Stop() {
 	fmt.Printf("[STOP] Server %s stop.\n", s.Name)
-
 }
 
 func (s *Server) Serve() {

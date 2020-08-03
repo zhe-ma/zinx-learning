@@ -47,7 +47,16 @@ func (msgHandler *MsgHandler) StartWorkPool() {
 
 	for i := 0; i < len(msgHandler.TaskQueues); i++ {
 		msgHandler.TaskQueues[i] = make(chan ziface.IRequest, msgHandler.MaxWorkerTaskLen)
-		for 
+
+		go func(taskQueue chan ziface.IRequest) {
+			for {
+				select {
+				case request := <-taskQueue:
+					msgHandler.HandleMsg(request)
+				}
+			}
+
+		}(msgHandler.TaskQueues[i])
 	}
 }
 
